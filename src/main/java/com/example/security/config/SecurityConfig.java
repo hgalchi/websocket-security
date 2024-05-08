@@ -19,22 +19,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.session.SessionManagementFilter;
 
 @Configuration
 @EnableWebSecurity(debug = true)
 class SecurityConfig {
 
-    @Bean
+  /*  @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        SecurityContextRepository repo=new HttpSessionSecurityContextRepository();
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/endPoint").hasAuthority("USER")
                         .requestMatchers("/loginUser").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .securityContext((context) -> context.
+                        securityContextRepository(repo));
 
         return http.build();
 
@@ -67,7 +72,7 @@ class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+    }*/
 
 }
 
