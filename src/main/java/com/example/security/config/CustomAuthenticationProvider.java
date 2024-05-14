@@ -1,10 +1,7 @@
 package com.example.security.config;
 
-import com.example.security.service.CustomUserDetailService;
 import io.micrometer.common.util.StringUtils;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
