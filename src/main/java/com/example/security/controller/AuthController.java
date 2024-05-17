@@ -1,36 +1,45 @@
 package com.example.security.controller;
 
-import com.example.security.config.service.DefaultUserService;
+import com.example.security.Entity.UserEntity;
+import com.example.security.service.DefaultUserService;
 import com.example.security.dto.UserData;
-import com.example.security.config.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.security.utils.JwtUtil;
 
 @RestController
 @RequiredArgsConstructor
-public class LoginController {
+public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-
-    private final UserService userService;
-
-    private final DefaultUserService defaultUserService;
     private final PasswordEncoder passwordEncoder;
 
+    private final DefaultUserService defaultUserService;
+    private final JwtUtil jwtUtil;
 
-    @GetMapping("/loginUser")
+
+    @GetMapping("/login")
     public String login() {
-       Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated("wywudi@kakao.com", "password");
-       authenticationManager.authenticate(authentication);
+        try {
+            Authentication authentication =
+                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken("wywudi@naver.com", "password"));
+            String email = authentication.getName();
+            UserEntity user = UserEntity.builder()
+                    .email(email)
+                    .build();
+            String token = jwtUtil.creteToken(user);
+            return "login succ! token :" + token + " /t email : " + email;
+        } catch (BadCredentialsException e) {
+            return "error";
+        }
 
-        return "loginUser";
     }
 
     @GetMapping("/home")
@@ -38,14 +47,6 @@ public class LoginController {
         return "home";
     }
 
-    @GetMapping("/save")
-    public String authenticationProviders() {
-
-        userService.saveUser(UserData.builder().name("springboot").email("wywudi@naver.com").password("password").build());
-
-        return "test1";
-
-    }
 
     @GetMapping("/register")
     public String register() {
@@ -60,33 +61,19 @@ public class LoginController {
         return "register";
     }
 
-
-    @GetMapping("/account/hi")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/customer")
     public String accountHi() {
-
-        return "accountHi";
+        return "authorities customer";
     }
 
-    @GetMapping("/endpoint")
-    @PreAuthorize("hasRole(ADMIN)")
+    @GetMapping("/admin")
     public String endpoint() {
-
-        return "endPoint";
+        return "admin";
     }
 
-    @GetMapping("/resource/authentication")
-    public String authentication() {
-        return "authentication";
-    }
 
     @GetMapping("/any")
-    public void authoriyRead(){
-
-    }
-
-    @PostMapping("/any")
-    public void authoriyWriter(){
-
+    public String any() {
+        return "any";
     }
 }

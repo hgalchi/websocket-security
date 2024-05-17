@@ -1,4 +1,4 @@
-package com.example.security.config.service;
+package com.example.security.service;
 
 import com.example.security.Entity.Group;
 import com.example.security.Entity.UserEntity;
@@ -6,8 +6,6 @@ import com.example.security.dto.UserData;
 import com.example.security.repository.GroupRepository;
 import com.example.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

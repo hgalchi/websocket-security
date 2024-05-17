@@ -1,4 +1,4 @@
-package com.example.security.config.service;
+package com.example.security.service;
 
 import com.example.security.Entity.UserEntity;
 import com.example.security.dto.UserData;

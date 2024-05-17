@@ -1,17 +1,13 @@
 package com.example.security.config;
 
-import com.example.security.config.service.RememberMeService;
-import jakarta.annotation.Resource;
-import jakarta.servlet.FilterChain;
+import com.example.security.config.filter.JwtAuthorizationFilter;
+import com.example.security.config.provider.CustomAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,37 +16,31 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
-import org.springframework.security.web.authentication.RememberMeServices;
-import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter;
-import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableWebSecurity()
 public class WebSecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationProvider customAuthenticationProvider) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthorizationFilter jwtAuthorizationFilter) throws Exception {
         http.
                 authorizeHttpRequests((auth) -> {
                     auth
-                            .requestMatchers("/loginUser", "/register", "/home", "/login").permitAll()
-                            .requestMatchers("/account/**").hasAnyAuthority("CUSTOMER", "ADMIN")
-                            .requestMatchers("/endpoint").hasAuthority("USER")
-                           // .requestMatchers("/resource/{name}").access(new WebExpressionAuthorizationManager("#name==authentication.name"))
-                           // .requestMatchers(HttpMethod.GET).hasAuthority("read")
-                           // .requestMatchers(HttpMethod.POST).hasAuthority("write")
-                            .anyRequest().denyAll();
+                            .requestMatchers("/register", "/home", "/login").permitAll()
+                            .requestMatchers("/customer").hasRole("CUSTOMER")
+                            .requestMatchers("/admin").hasRole("ADMIN")
+                            .requestMatchers("/auth").hasAnyRole("ADMIN", "CUSTOMER")
+                            .anyRequest().authenticated();
 
                 })
-                .formLogin(form -> form.loginPage("/loginUser").defaultSuccessUrl("/account/hi"))
+                .formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/home"))
                 .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -64,9 +54,7 @@ public class WebSecurityConfig {
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
 
-        CustomAuthenticationProvider customAuthenticationProvider = new CustomAuthenticationProvider(userDetailsService);
         list.add(authProvider);
-        list.add(customAuthenticationProvider);
 
         return new ProviderManager(list);
     }

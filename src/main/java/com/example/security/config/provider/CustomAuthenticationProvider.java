@@ -1,4 +1,4 @@
-package com.example.security.config;
+package com.example.security.config.provider;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
