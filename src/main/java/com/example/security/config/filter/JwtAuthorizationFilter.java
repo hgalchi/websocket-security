@@ -46,12 +46,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             Claims claims = jwtUtil.resolveClaims(request);
 
             if (claims != null & jwtUtil.validateClaims(claims)) {
-                String email = claims.getSubject();
-                System.out.println("email :" + email);
+                String email = jwtUtil.getEmail(claims);
+                List<String> authorityList = jwtUtil.getRoles(claims);
 
-                UserEntity user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
-                List<SimpleGrantedAuthority> authorities = user.getUserGroups().stream()
-                        .map(t -> new SimpleGrantedAuthority(t.getCode().toUpperCase()))
+                List<SimpleGrantedAuthority> authorities = authorityList.stream()
+                        .map(t -> new SimpleGrantedAuthority(t.toUpperCase()))
                         .collect(Collectors.toList());
 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(email, "", authorities);

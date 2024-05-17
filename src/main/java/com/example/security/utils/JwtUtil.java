@@ -3,11 +3,14 @@ package com.example.security.utils;
 import com.example.security.Entity.UserEntity;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -30,8 +33,13 @@ public class JwtUtil {
      * @return
      */
     public String creteToken(UserEntity user) {
+
+        List<String> roles = user.getUserGroups().stream()
+                .map(t ->t.getCode().toUpperCase())
+                .collect(Collectors.toList());
+
         Claims claims = Jwts.claims().setSubject(user.getEmail());
-        claims.put("id", user.getId());
+        claims.put("roles", roles);
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
         return Jwts.builder()
@@ -40,6 +48,11 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, secret_key)
                 .compact();
     }
+
+    private String refreshToken(String token) {
+
+    }
+
 
     /**
      * Claims로 변환
@@ -99,7 +112,7 @@ public class JwtUtil {
     }
 
     //왜 private
-    private List<String> getRoles(Claims claims) {
+    public List<String> getRoles(Claims claims) {
         return (List<String>) claims.get("roles");
     }
 }
