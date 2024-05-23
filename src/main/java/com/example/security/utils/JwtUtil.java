@@ -2,46 +2,58 @@ package com.example.security.utils;
 
 import com.example.security.Entity.UserEntity;
 import io.jsonwebtoken.*;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
 
-    private final String secret_key = "mysecretkey";
-    private long accessTokenValidity = 60 * 60 * 1000;
 
-    private final JwtParser jwtParser;
+    @Value("${refresh.expriation-time}")
+    private String refreshExpirationTime;
+
+    @Value("${access.expriation-time}")
+    private String accessExpirationTime;
+
+    @Value("${jwt.secret-key}")
+    private String secret_key;
 
     private final String TOKEN_HADER = "Authorization";
     private final String TOKEN_PREFIX = "Bearer";
 
+
+    private final JwtParser jwtParser;
+
     public JwtUtil() {
-        this.jwtParser = Jwts.parser().setSigningKey(secret_key);
+        this.jwtParser = Jwts.parser().setSigningKey("mysecretkey");
     }
 
     /**
-     * jwt token생성
-     * @param user
+     * 
+     * @param email
+     * @param roles
+     * @param id
      * @return
      */
-    public String creteToken(UserEntity user) {
+    public String creteToken(String email,List<String> roles,String id) {
 
-        List<String> roles = user.getUserGroups().stream()
-                .map(t ->t.getCode().toUpperCase())
-                .collect(Collectors.toList());
-
-        Claims claims = Jwts.claims().setSubject(user.getEmail());
+        Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
+        claims.put("id", id);
+
+        Long token=(Objects.equals(id, "accessToken") ? Long.parseLong(accessExpirationTime) : Long.parseLong(refreshExpirationTime));
         Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(token));
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(tokenValidity)
@@ -49,8 +61,10 @@ public class JwtUtil {
                 .compact();
     }
 
-    private String refreshToken(String token) {
-
+    public String refreshExpireTime() {
+        Date tokenCreateTime = new Date();
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(Long.parseLong(refreshExpirationTime)));
+        return tokenValidity.toString();
     }
 
 
@@ -59,7 +73,7 @@ public class JwtUtil {
      * @param token
      * @return
      */
-    private Claims parseJwtClaims(String token) {
+    public Claims parseJwtClaims(String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
@@ -81,6 +95,20 @@ public class JwtUtil {
             throw e;
         }
     }
+
+    public String resolveCookie(HttpServletRequest req) {
+        //get refresh token
+        String refresh = null;
+        Cookie[] cookies = req.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("refresh")) {
+                refresh = cookie.getValue();
+            }
+        }
+        return refresh;
+
+    }
+
 
     /**
      * req로 전송된 토큰 분리
@@ -111,8 +139,13 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    //왜 private
     public List<String> getRoles(Claims claims) {
         return (List<String>) claims.get("roles");
     }
+
+    public String getId(Claims claims) {
+        return claims.get("id").toString();
+    }
+
+
 }

@@ -4,6 +4,7 @@ import com.example.security.Entity.Group;
 import com.example.security.Entity.UserEntity;
 import com.example.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -27,11 +28,10 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         UserEntity customer = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+                .orElseThrow(() -> new UsernameNotFoundException(email+"not found"));
 
         UserDetails user = User.withUsername(customer.getEmail())
                 .password(customer.getPassword())
-//                .authorities("ROLE_ADMIN")
                 .authorities(getAuthorities(customer))
                 .build();
 

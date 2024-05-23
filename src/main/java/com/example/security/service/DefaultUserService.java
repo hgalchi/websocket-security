@@ -27,7 +27,7 @@ public class DefaultUserService {
     }
 
     private void updateCustomerGroup(UserEntity userEntity) {
-        Group group = groupRepository.findByCode("customer");
+        Group group = groupRepository.findByCode("role_customer");
         userEntity.addUserGroups(group);
     }
 

@@ -21,7 +21,6 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
     private String password;
-    private String token;
 
     @ManyToMany(cascade = {
             CascadeType.PERSIST,
