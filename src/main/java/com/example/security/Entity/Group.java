@@ -20,5 +20,5 @@ public class Group {
     private String name;
 
     @ManyToMany(mappedBy = "userGroups")
-    private Set<UserEntity> users;
+    private Set<User> users;
 }

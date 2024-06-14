@@ -1,15 +1,12 @@
-package com.example.security.config;
+package com.example.security.auth.config;
 
-import com.example.security.config.filter.JwtAuthorizationFilter;
-import com.example.security.config.provider.CustomAuthenticationProvider;
-import com.example.security.config.service.CustomAuthenticationSuccessHandler;
-import com.example.security.repository.UserRepository;
-import com.example.security.utils.JwtUtil;
+import com.example.security.auth.filter.JwtAuthorizationFilter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -20,25 +17,34 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
+    @Qualifier("customAuthenticationEntryPoint")
+    private final AuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final AuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final AuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final AccessDeniedHandler customAccessDeniedHandler;
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
+
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthorizationFilter jwtAuthorizationFilter,CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(auth -> auth.disable())
                 .authorizeHttpRequests((auth) -> {
                     auth
-                            .requestMatchers("/reissue").permitAll()
-                            .requestMatchers("/register", "/home", "/login").permitAll()
+                            .requestMatchers("/register", "/reissue", "/login","/socket").permitAll()
                             .requestMatchers("/customer").hasRole("CUSTOMER")
                             .requestMatchers("/admin").hasRole("ADMIN")
                             .requestMatchers("/auth").hasAnyRole("ADMIN", "CUSTOMER")
@@ -47,11 +53,14 @@ public class WebSecurityConfig {
                 })
                 .formLogin(form -> form
                         .loginPage("/login")
+                        .failureHandler(customAuthenticationFailureHandler)
                         .successHandler(customAuthenticationSuccessHandler)
                 )
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(customAuthenticationEntryPoint))
+                .exceptionHandling(h -> h.accessDeniedHandler(customAccessDeniedHandler));
 
 
         return http.build();
@@ -66,15 +75,10 @@ public class WebSecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
 
-        List<AuthenticationProvider> list = new ArrayList<>();
-
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
-
-        list.add(authProvider);
-
-        return new ProviderManager(list);
+        return new ProviderManager(authProvider);
     }
 
     @Bean

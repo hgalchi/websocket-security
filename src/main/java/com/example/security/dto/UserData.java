@@ -1,23 +1,35 @@
 package com.example.security.dto;
 
-import com.example.security.Entity.UserEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.example.security.Entity.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class UserData {
 
+    @Size(min = 3, message = "Invalid writer:3~5")
+    @NotBlank(message = "이름은 필수 입력값입니다.")
     private String name;
-    private String password;
-    private String email;
-    private String token;
 
-    public UserEntity toUserEntity(){
-        return UserEntity.builder().name(name).password(password).email(email).build();
+    @Size(min = 8,max=16, message = "Invalid writer:3~5")
+    @NotBlank(message = "비밀번호는 필수 입력값입니다.")
+    private String password;
+
+    @Email
+    @NotBlank(message = "이메일은 필수 입력값입니다.")
+    private String email;
+
+    public User toUserEntity(){
+        return User.builder().name(name).password(password).email(email).build();
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

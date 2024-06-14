@@ -1,10 +1,10 @@
 package com.example.security.utils;
 
-import com.example.security.Entity.UserEntity;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-
+//todo : 외부설정 파일에서 정보 가져오기
     @Value("${refresh.expriation-time}")
     private String refreshExpirationTime;
 
@@ -39,21 +39,21 @@ public class JwtUtil {
     }
 
     /**
-     * 
-     * @param email
-     * @param roles
-     * @param id
-     * @return
+     * 토큰 생성
+     * @param email 사용자 이메일
+     * @param roles 사용자 권한
+     * @param catetory  accesstoken,refreshtoken을 구분하기 위한 문자열
+     * @return 생성된 JWT토큰
      */
-    public String creteToken(String email,List<String> roles,String id) {
+    public String creteToken(String email,List<String> roles,String catetory) {
 
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
-        claims.put("id", id);
+        claims.put("catetory", catetory);
 
-        Long token=(Objects.equals(id, "accessToken") ? Long.parseLong(accessExpirationTime) : Long.parseLong(refreshExpirationTime));
-        Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(token));
+        Long token=(Objects.equals(catetory, "accessToken") ? Long.parseLong(accessExpirationTime) : Long.parseLong(refreshExpirationTime));
+        Date tokenValidity = new Date(new Date().getTime() + TimeUnit.MINUTES.toMillis(token));
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(tokenValidity)
@@ -61,6 +61,9 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * refresh만료 기간 반환
+     */
     public String refreshExpireTime() {
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(Long.parseLong(refreshExpirationTime)));
@@ -69,34 +72,33 @@ public class JwtUtil {
 
 
     /**
-     * Claims로 변환
-     * @param token
-     * @return
+     * JWT 토큰을  Claims으로 변환
+     * @return 토큰에서 추출한 Claims
      */
-    public Claims parseJwtClaims(String token) {
+    private Claims parseJwtClaims(String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
     /**
-     * token의 valid검사
-     * @param req
+     * JWT 토큰의 유효성 검증
+     * @throws  SignatureException,MalformedJwtException,ExpiredJwtException 토큰이 유효하지 않을 때 발생
+     * @param token
      * @return
      */
-    public Claims resolveClaims(HttpServletRequest req) {
+    public Claims validateToken(String token) {
+
         try {
-            String token = resolveToken(req);
             if (token != null) return parseJwtClaims(token);
             return null;
-        } catch (ExpiredJwtException e) {
-            req.setAttribute("expired", e.getMessage());
-            throw e;
         } catch (Exception e) {
-            req.setAttribute("invalid", e.getMessage());
             throw e;
         }
     }
 
-    public String resolveCookie(HttpServletRequest req) {
+    /**
+     * Http 요청쿠키에서 refresh 토큰 추출
+     */
+    public String parseRefresh(HttpServletRequest req) {
         //get refresh token
         String refresh = null;
         Cookie[] cookies = req.getCookies();
@@ -109,30 +111,21 @@ public class JwtUtil {
 
     }
 
-
     /**
-     * req로 전송된 토큰 분리
-     * @param req
-     * @return
+     * Bearer 토큰에서 JWT 토큰 분리
      */
-    public String resolveToken(HttpServletRequest req) {
-        String bearerToken = req.getHeader(TOKEN_HADER);
+    public String resolveToken(String bearerToken) {
         if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
             return bearerToken.substring(TOKEN_PREFIX.length());
         }return null;
     }
 
     /**
-     * valid token exprire
-     * @param claims
-     * @return
+     * Claims의 만료 기간 검증
+     * @return 만료기간이 유효하면 true, 그렇지 않으면 false
      */
     public boolean validateClaims(Claims claims) {
-        try {
             return claims.getExpiration().after(new Date());
-        } catch (Exception e) {
-            throw e;
-        }
     }
 
     public String getEmail(Claims claims) {

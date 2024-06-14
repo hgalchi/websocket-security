@@ -1,27 +1,26 @@
-package com.example.security.Entity;
+package com.example.security.chat.Entity;
 
+import com.example.security.Entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Refresh {
 
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class UserChatroom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
+    private Chatroom chatRoom;
+
+    @ManyToOne
     private User user;
 
-    @Column(length = 1024)
-    private String refresh;
 
-    private String expiration;
 }

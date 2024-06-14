@@ -30,9 +30,9 @@ public class ReissueController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest req, HttpServletResponse res) {
 
-        String refreshToken = jwtUtil.resolveCookie(req);
+        String refreshToken = jwtUtil.parseRefresh(req);
         //refresh token 취득
-        Claims claims = jwtUtil.parseJwtClaims(refreshToken);
+        Claims claims = jwtUtil.validateToken(refreshToken);
 
         //만료시간 확인
         try{

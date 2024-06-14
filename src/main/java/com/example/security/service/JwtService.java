@@ -1,6 +1,5 @@
 package com.example.security.service;
 
-import com.example.security.Entity.UserEntity;
 import com.example.security.repository.UserRepository;
 import com.example.security.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
