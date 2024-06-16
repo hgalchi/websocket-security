@@ -18,9 +18,6 @@ import java.security.SignatureException;
 @RestControllerAdvice
 public class ExceptionResponseHandler extends ResponseEntityExceptionHandler {
 
-    /**
-     * validation 유효성 검증 exception
-     */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         logger.error("handlerInvalideExcecption", ex);
@@ -48,7 +45,10 @@ public class ExceptionResponseHandler extends ResponseEntityExceptionHandler {
                 .body("토큰이 만료되었습니다.");
     }
 
-
-
-
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        ErrorResponse response=new ErrorResponse(ErrorCode.USER_ALEADY_EXISTS,ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(response);
+    }
 }

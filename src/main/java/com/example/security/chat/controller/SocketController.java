@@ -32,13 +32,7 @@ public class SocketController {
     private final SocketService socketService;
     private final ServerProperties serverProperties;
 
-    //사용자가 채널을 구독할 때 호출됩니다.
-    //applicationDestinationPrefixes에 정의된 접두사를 포함해야한다.
-    //@Sendto()파라미터로 동적인 값을 사용하고 싶을 때는 반환하는 simpMessagingTemplate를 사용해야한다.
-    //subscibeMapping은 왜 있는걸까
-    //interceptor에서 subscribe일 때 검사해야하는 이유
-    //아래 path를 무시하고 subscribe를 진행할 때
-    // broker에 구독?
+    // todo : 초기데이터 전송
     @SubscribeMapping(value = "/chat/room/{roomId}/data")
     public void subscribe(StompHeaderAccessor accessor, @DestinationVariable Long roomId, @Header("simpSessionAttributes") Map<String, Object> attributes) {
         /*
@@ -55,7 +49,7 @@ public class SocketController {
         template.convertAndSend("/topic/room/" + roomId, message);
 
     }
-
+    //채팅방 퇴장
     @MessageMapping("/chat/room/{roomId}/leave")
     public void leave(@DestinationVariable Long roomId, @Header("simpSessionAttributes") Map<String, Object> attributes) {
         String userSession=attributes.get("userSession").toString();
@@ -64,7 +58,7 @@ public class SocketController {
 
     }
 
-    //point-to-point
+    //todo : 1:1 채팅
     @MessageMapping("/user")
     public void sendSpecific(
                                @Payload Message msg,

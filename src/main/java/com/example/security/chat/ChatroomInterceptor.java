@@ -35,9 +35,11 @@ public class ChatroomInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        /*
+         *CONNECT할 경우 유저의 accessToken을 사용해 인증 여부를 확인 후
+         * STOMP HEADER에 식별가능한 값 email을 추가
+         */
         if (accessor.getCommand().equals(StompCommand.CONNECT)) {
-            //인증된 사용자만 connect를 허용한다.
-
             String authorizationHeader = String.valueOf(accessor.getNativeHeader("Authorization").get(0));
             //token 인증
             String email =validateToken(authorizationHeader);
@@ -45,9 +47,12 @@ public class ChatroomInterceptor implements ChannelInterceptor {
             Map<String,Object> sessionAttributes = accessor.getSessionAttributes();
             sessionAttributes.put("email",email);
             accessor.setSessionAttributes(sessionAttributes);
-
+        /*
+         * SUBCRIBE할 경우 구독 경로를 검사한 후
+         * 채팅방에 유저 추가
+         */
         }else if(accessor.getCommand().equals(StompCommand.SUBSCRIBE)){
-            //destination 경로 검사 "/app/chat/room/**","/topic/room/**"이외의 경로 구독은 허용하지 않는다.
+            //destination 경로 검사 "/app/chat/room/**","/topic/room/**"이외의 경로 구독은 거절
             String destination = accessor.getDestination();
             if (destination == null ||!destination.startsWith("/topic/room/")) {
                 throw new MessageDeliveryException("Invalid destination");
@@ -56,24 +61,20 @@ public class ChatroomInterceptor implements ChannelInterceptor {
             String email=Optional.of((String) accessor.getSessionAttributes().get("email"))
                     .orElseThrow(()->new MessageDeliveryException("Invalid email"));
             Long roomId = Long.parseLong(destination.split("/")[3]) ;
-            socketService.join(roomId, email);
+            socketService.join(email,roomId);
+        /*
+         * 클라이언트의 MESSAGE는 모두 거절
+         */
         }else if(accessor.getCommand().equals(StompCommand.MESSAGE)){
             throw new MessageDeliveryException("Invalid command");
         }
 
-        System.out.println("Command: " + accessor.getCommand());
-        MessageHeaders headers = message.getHeaders();
-        MultiValueMap<String, String> multiValueMap = headers.get(StompHeaderAccessor.NATIVE_HEADERS, MultiValueMap.class);
-        if (multiValueMap != null) {
-            for (Map.Entry<String, List<String>> head : multiValueMap.entrySet()) {
-                System.out.println(head.getKey() + "#" + head.getValue());
-            }
-        }
+        printStompFrame(message,accessor);
+
         return message;
     }
-    /* 토큰 인증
-     * 메세지 헤더에 존재하는 "Authorization"을 받는다.
-     * 받은 값을 검증한다.
+    /**
+     * 토큰 인증
      * 만료나 변조 시, 예외를 터트린다.
      */
     private String validateToken(String authorizationHeader) {
@@ -92,5 +93,19 @@ public class ChatroomInterceptor implements ChannelInterceptor {
             throw new MessageDeliveryException("Authorization header is missing");
         }
         return authorizationHeader.substring("Bearer".length());
+    }
+
+    /**
+     * 요청 Frame출력
+     */
+    private void printStompFrame(Message<?> message,StompHeaderAccessor accessor) {
+        System.out.println("Command: " + accessor.getCommand());
+        MessageHeaders headers = message.getHeaders();
+        MultiValueMap<String, String> multiValueMap = headers.get(StompHeaderAccessor.NATIVE_HEADERS, MultiValueMap.class);
+        if (multiValueMap != null) {
+            for (Map.Entry<String, List<String>> head : multiValueMap.entrySet()) {
+                System.out.println(head.getKey() + "#" + head.getValue());
+            }
+        }
     }
 }

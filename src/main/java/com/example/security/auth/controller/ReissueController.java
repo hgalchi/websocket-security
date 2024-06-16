@@ -1,18 +1,16 @@
-package com.example.security.controller;
+package com.example.security.auth.controller;
 
-import com.example.security.Entity.Refresh;
+import com.example.security.auth.entity.Refresh;
 import com.example.security.repository.RefreshRepository;
-import com.example.security.service.JwtService;
+import com.example.security.auth.service.JwtService;
 import com.example.security.utils.CookieUtil;
 import com.example.security.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 

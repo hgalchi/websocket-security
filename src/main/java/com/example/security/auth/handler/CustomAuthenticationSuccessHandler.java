@@ -1,6 +1,6 @@
 package com.example.security.auth.handler;
 
-import com.example.security.Entity.Refresh;
+import com.example.security.auth.entity.Refresh;
 import com.example.security.Entity.User;
 import com.example.security.repository.RefreshRepository;
 import com.example.security.repository.UserRepository;
@@ -15,13 +15,11 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 

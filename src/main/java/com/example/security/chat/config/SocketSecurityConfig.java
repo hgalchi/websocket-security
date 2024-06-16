@@ -12,7 +12,7 @@ public class SocketSecurityConfig  {
     public MessageMatcherDelegatingAuthorizationManager.Builder messageMatcherDelegatingAuthorizationManagerBuilder() {
         return new MessageMatcherDelegatingAuthorizationManager.Builder();
     }
-// todo : stomp에 security 적용 이슈  interceptor로 구현하고 추후 구현
+// todo : websocket security 적용 이슈  interceptor로 구현하고 추후 구현
     /*@Bean
     AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages

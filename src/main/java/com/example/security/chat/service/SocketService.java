@@ -28,10 +28,13 @@ public class SocketService {
     private final UserChatroomRepository userChatroomRepository;
     private final ChatmessageRepository chatMessageRepository;
 
-
+    /**
+     * 채팅방 입장
+     * @param email 유저 email
+     * @param roomId 입장하는 room pk
+     */
     @Transactional
-    public void join(Long roomId,String email) {
-        //chatroom 존재확인
+    public void join(String email,Long roomId) {
         Chatroom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new UsernameNotFoundException("채팅방을 찾을 수 없습니다."));
         //현재 인원수 확인
         if ( chatRoom.getMaxCount()> chatRoom.getCount()) {
@@ -42,7 +45,6 @@ public class SocketService {
                     .user(user)
                     .build();
 
-
             chatRoom.setUserCount(chatRoom.getCount()+1);
             chatRoom.addDetail(userChatroom);
             chatRoomRepository.save(chatRoom);
@@ -50,6 +52,11 @@ public class SocketService {
 
     }
 
+    /**
+     * 채팅방 퇴방
+     * @param email 유저 email
+     * @param roomId 퇴장하는 room pk
+     */
     @Transactional
     public void leave(String email,Long roomId) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("회원을 찾을 수 없습니다."));
@@ -60,6 +67,12 @@ public class SocketService {
         chatRoomRepository.save(chatroom);
     }
 
+    /**
+     * 채팅 메세지 저장
+     * @param message 유저가 보낸 메세지
+     * @param roomId room pk
+     * @param email 유저 email
+     */
     public void saveMessage(String message, Long roomId,String email) {
         Chatroom chatroom = chatRoomRepository.findById(roomId).get();
         Chatmessage chatmessage = Chatmessage.builder()

@@ -22,7 +22,7 @@ public class Chatmessage {
 
     private String sender;
 
-    //저장 형식 수정
+    //todo 저장 형식 수정
     private LocalDateTime time;
 
     @ManyToOne

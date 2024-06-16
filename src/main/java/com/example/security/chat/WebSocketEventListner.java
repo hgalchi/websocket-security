@@ -29,19 +29,14 @@ public class WebSocketEventListner {
     @EventListener
     public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
         logger.info("Received a new web socket subcribe");
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        Map<String, Object> sessionAttribute = accessor.getSessionAttributes();
-        String username = (String) sessionAttribute.get("session");
 
-        template.convertAndSend("/topic/room/2",username+"입장했습니다");
+        template.convertAndSend("/topic/room/2",event.getUser().getName()+"입장했습니다");
     }
 
 
     @EventListener
     public void handleWebSocketDisconnectListner(SessionDisconnectEvent event) {
         logger.info("Received a new web socket disconnect");
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-
     }
 
 }

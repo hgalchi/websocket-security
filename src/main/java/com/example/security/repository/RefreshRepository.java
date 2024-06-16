@@ -1,6 +1,6 @@
 package com.example.security.repository;
 
-import com.example.security.Entity.Refresh;
+import com.example.security.auth.entity.Refresh;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -11,7 +11,6 @@ import java.util.Optional;
 @Repository
 public interface UserChatroomRepository extends JpaRepository<UserChatroom, Long> {
 
-    //JPA엔티티 클래스에 정의된 필드명으로 지정
     public Optional<UserChatroom> findByUserAndChatRoom(User user, Chatroom chatroom);
 
 }

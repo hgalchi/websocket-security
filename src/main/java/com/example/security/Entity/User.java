@@ -1,5 +1,6 @@
 package com.example.security.Entity;
 
+import com.example.security.auth.entity.Group;
 import jakarta.persistence.*;
 import lombok.*;
 

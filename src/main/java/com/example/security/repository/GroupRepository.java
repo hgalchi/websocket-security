@@ -1,6 +1,6 @@
 package com.example.security.repository;
 
-import com.example.security.Entity.Group;
+import com.example.security.auth.entity.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

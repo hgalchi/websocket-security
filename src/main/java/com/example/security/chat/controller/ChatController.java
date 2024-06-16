@@ -16,7 +16,7 @@ public class ChatController {
     private final ChatroomRepository chatRoomRepository;
     private final SocketService socketService;
 
-    //채팅방 리스트 로드
+    //채팅방 리스트
     @GetMapping("/list")
     public String list() {
         List<Chatroom> list = chatRoomRepository.findAll();

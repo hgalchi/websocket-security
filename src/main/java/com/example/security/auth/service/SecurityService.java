@@ -4,14 +4,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 /**
- * 리소스에 접근권한 인증
+ * 리소스의 접근권한 인증 서비스
  */
 @Service
-public class MySecurityService  {
+public class SecurityService  {
     /**
-     * 리소스의 주인이 사용자인가 인증
+     * 사용자가 리소스의 주인임을 체크
      * @param authentication
-     * @param email 리소스의 분별가능한
+     * @param email 리소스를 구분하는 필드
      * @return
      */
     public boolean isResourceOwner(Authentication authentication, String email) {
