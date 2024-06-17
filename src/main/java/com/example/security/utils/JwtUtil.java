@@ -136,8 +136,8 @@ public class JwtUtil {
         return (List<String>) claims.get("roles");
     }
 
-    public String getId(Claims claims) {
-        return claims.get("id").toString();
+    public String getCategory(Claims claims) {
+        return claims.get("catetory").toString();
     }
 
 

@@ -1,6 +1,8 @@
 package com.example.security.auth.controller;
 
 import com.example.security.auth.entity.Refresh;
+import com.example.security.codes.ErrorCode;
+import com.example.security.exception.BusinessException;
 import com.example.security.repository.RefreshRepository;
 import com.example.security.auth.service.JwtService;
 import com.example.security.utils.CookieUtil;
@@ -11,8 +13,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -29,30 +33,24 @@ public class ReissueController {
     public ResponseEntity<?> reissue(HttpServletRequest req, HttpServletResponse res) {
 
         String refreshToken = jwtUtil.parseRefresh(req);
-        //refresh token 취득
+        jwtUtil.validateToken(refreshToken);
+
         Claims claims = jwtUtil.validateToken(refreshToken);
+        jwtUtil.validateClaims(claims);
 
-        //만료시간 확인
-        try{
-            jwtUtil.validateClaims(claims);
-        }catch (Exception e){
-            return new ResponseEntity<>("refresh token expried", HttpStatus.BAD_REQUEST);
-        }
+        //refresh Token 확인
+        String id = jwtUtil.getCategory(claims);
+        if(!id.equals("refreshToken")) throw new BusinessException(ErrorCode.CATEGORY_NOT_REFRESH);
 
-        //토큰이 refresh인지 확인
-        String id = jwtUtil.getId(claims);
-        if(!id.equals("refresh")) return new ResponseEntity<>("invalid id", HttpStatus.BAD_REQUEST);
-
-        System.out.println(refreshToken);
         //db에 저장되어 있는지 확인
         Boolean isExist = refreshRepository.existsByRefresh(refreshToken);
-        if(!isExist) return new ResponseEntity<>("not exists refreshtoken", HttpStatus.BAD_REQUEST);
+        if(!isExist) throw new BusinessException(ErrorCode.TOKEN_NOT_EXIST);
 
         //새로운 jwt 생성
         String email = jwtUtil.getEmail(claims);
         List<String> roles = jwtUtil.getRoles(claims);
-        String newRefreshToken =jwtUtil.creteToken(email, roles, "refresh");
-        String newAccessToken = jwtUtil.creteToken(email, roles, "access");
+        String newRefreshToken =jwtUtil.creteToken(email, roles, "refreshToken");
+        String newAccessToken = jwtUtil.creteToken(email, roles, "accessToken");
 
         Refresh newRefresh = Refresh.builder()
                 .refresh(newRefreshToken)

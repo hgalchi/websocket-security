@@ -12,11 +12,11 @@ import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBl
 @Builder
 public class UserData {
 
-    @Size(min = 3, message = "Invalid writer:3~5")
+    @Size(min = 3, message = "3~5자리로 입력해주세요")
     @NotBlank(message = "이름은 필수 입력값입니다.")
     private String name;
 
-    @Size(min = 8,max=16, message = "Invalid writer:3~5")
+    @Size(min = 8,max=16, message = "4~8자리로 입력해주세요")
     @NotBlank(message = "비밀번호는 필수 입력값입니다.")
     private String password;
 

@@ -2,7 +2,8 @@ package com.example.security.service;
 
 import com.example.security.auth.entity.Group;
 import com.example.security.Entity.User;
-import com.example.security.exception.UserAlreadyExistsException;
+import com.example.security.codes.ErrorCode;
+import com.example.security.exception.BusinessException;
 import com.example.security.repository.GroupRepository;
 import com.example.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -22,7 +23,7 @@ public class UserService {
     public void register(User user) {
         String email = user.getEmail();
         if (checkIfUserExist(email)) {
-            throw new UserAlreadyExistsException(email+" 회원이 이미 존재합니다.");
+            throw new BusinessException(ErrorCode.USER_ALEADY_EXISTS);
         }
         updateCustomerGroup(user);
         userRepository.save(user);

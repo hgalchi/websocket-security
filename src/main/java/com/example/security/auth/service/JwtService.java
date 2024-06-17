@@ -26,7 +26,7 @@ public class JwtService {
         }
 
         //토큰이 refresh인지 확인
-        String id = jwtUtil.getId(claims);
+        String id = jwtUtil.getCategory(claims);
         if (!id.equals("refreshToken")) {
             throw new IllegalAccessError();
         }

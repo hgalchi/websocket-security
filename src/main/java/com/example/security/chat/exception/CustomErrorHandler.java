@@ -1,13 +1,9 @@
 package com.example.security.chat.exception;
 
-import com.example.security.exception.ErrorCode;
-import com.example.security.exception.ErrorResponse;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
+import com.example.security.codes.ErrorCode;
+import com.example.security.codes.ErrorResponse;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -29,19 +25,11 @@ public class CustomErrorHandler extends StompSubProtocolErrorHandler {
 
         log.info("CustomErrorHandler exception : " + ex);
 
-        /*if (ex instanceof MalformedJwtException) {
-            return handleUnauthorizedException(clientMessage, ex);
-        } else if (ex instanceof ExpiredJwtException) {
-            return handleUnauthorizedException(clientMessage, ex);
-        } else if(ex instanceof MessageDeliveryException ) {
-            return handleUnauthorizedException(clientMessage, ex);
-        }*/
         return super.handleClientMessageProcessingError(clientMessage, ex);
+
     }
 
-    private Message<byte[]> handleUnauthorizedException(Message<byte[]> clientMessage, Throwable ex) {
-        //수정
-        ErrorResponse message = new ErrorResponse(ErrorCode.UNAUTHORIZED, ex.getMessage());
+    private Message<byte[]> errorMessage(String message) {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 
         accessor.setMessage(ErrorCode.UNAUTHORIZED.toString());
@@ -50,6 +38,5 @@ public class CustomErrorHandler extends StompSubProtocolErrorHandler {
         return MessageBuilder.createMessage(message.toString().getBytes(StandardCharsets.UTF_8)
                 , accessor.getMessageHeaders());
     }
-
 
 }

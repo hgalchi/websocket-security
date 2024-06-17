@@ -44,16 +44,7 @@ public class AuthController {
         return "admin";
     }
 
-    @GetMapping("/customError")
-    public String customError() {
-        return "404 페이지 접근 권한이 없습니다.";
-    }
 
-    @GetMapping("/login")
-    public String loginError(@RequestParam(value = "error", required = false) String error,
-                             @RequestParam(value = "exceptionMessage", required = false) String exceptionMessage) {
-        return "error: " + error + ", exception: " + exceptionMessage;
-    }
     @PostAuthorize("isAuthenticated() and(returnObject.email==authentication.name)")
     @GetMapping("/boardPost/{seq}")
     public UserData getEmail(@PathVariable("seq") long seq, Principal principal) {
@@ -68,7 +59,7 @@ public class AuthController {
 
   //todo : 게시글 등록 시 email을 id로 변경
     @GetMapping("/boardRegister/{email}")
-    @PreAuthorize("@securityService.isResourceOwner(authentication,#email)")
+    @PreAuthorize("@mySecurityService.isResourceOwner(authentication,#email)")
     //@PreAuthorize("isAuthenticated() and #email==authentication.name")
     public String getName(@PathVariable("email") String email) {
         System.out.println("이메일: " + email);
@@ -76,4 +67,14 @@ public class AuthController {
     }
 
 
+    @GetMapping("/customError")
+    public String customError() {
+        return "404 페이지 접근 권한이 없습니다.";
+    }
+
+    @GetMapping("/login")
+    public String loginError(@RequestParam(value = "error", required = false) String error,
+                             @RequestParam(value = "exceptionMessage", required = false) String exceptionMessage) {
+        return "error: " + error + ", exception: " + exceptionMessage;
+    }
 }

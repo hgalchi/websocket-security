@@ -23,12 +23,10 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         String errorMessage = "";
 
-        if (exception instanceof UsernameNotFoundException) {
-            errorMessage = exception.getMessage();
-        } else if (exception instanceof BadCredentialsException) {
-            errorMessage = exception.getMessage();
+        if (exception instanceof BadCredentialsException) {
+            errorMessage = "아이디혹은 비밀번호가 불일치합니다";
         }else {
-            errorMessage = "알 수 없는 이유로 로그인이 안되고 있습니다.";
+            errorMessage = "알 수 없는 이유로 로그인이 불가합니다.";
         }
         log.info("failureHandler :" + exception);
 

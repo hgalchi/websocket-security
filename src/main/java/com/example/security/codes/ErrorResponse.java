@@ -1,4 +1,4 @@
-package com.example.security.exception;
+package com.example.security.codes;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -49,8 +49,11 @@ public class ErrorResponse {
         this.errors = new ArrayList<>(List.of(error));
     }
 
-    public ErrorResponse(String message) {
-        this.message = message;
+    public ErrorResponse(ErrorCode errorCode) {
+        this.status = errorCode.getStatus();
+        this.message = errorCode.getMessage();
+        this.errors = new ArrayList<>();
     }
+
 }
 

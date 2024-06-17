@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
  * 리소스의 접근권한 인증 서비스
  */
 @Service
-public class SecurityService  {
+public class MySecurityService  {
     /**
      * 사용자가 리소스의 주인임을 체크
      * @param authentication
